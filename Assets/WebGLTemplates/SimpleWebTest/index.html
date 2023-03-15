@@ -1,0 +1,69 @@
+<!--
+ Copyright 2022 The SeedV Lab (Beijing SeedV Technology Co., Ltd.)
+ All Rights Reserved.
+
+ This HTML/JS template is a simple test of Splash3DUnity, only for quick
+ verifying the WebGL build. Please use splash-app for the app-level integration.
+-->
+
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Splash3D Simple Web Test</title>
+  </head>
+  <body style="text-align: center; padding: 0; border: 0; margin: 1em;">
+    <div style="margin: 1em;">
+      <input id="inspector-on" type="button" value="Turn On Inspector">
+      &nbsp;
+      <input id="inspector-off" type="button" value="Turn Off Inspector">
+      &nbsp;
+      <input id="quit" type="button" value="Quit Unity">
+    </div>
+    <canvas id="unity-canvas" width=1440 height=810
+        style="width: 1440px; height: 810px; background: #333"></canvas>
+    <script src="Build/{{{ LOADER_FILENAME }}}"></script>
+    <script>
+      const API_OBJ_NAME = 'ServiceProvider';
+      // A fake react-unity-webgl interface to avoid error info.
+      window.dispatchReactUnityEvent = () => {};
+      let unity = null;
+      createUnityInstance(document.querySelector('#unity-canvas'), {
+        dataUrl: 'Build/{{{ DATA_FILENAME }}}',
+        frameworkUrl: 'Build/{{{ FRAMEWORK_FILENAME }}}',
+#if USE_WASM
+        codeUrl: 'Build/{{{ CODE_FILENAME }}}',
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: 'StreamingAssets',
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        matchWebGLToCanvasSize: true,
+        devicePixelRatio: window.devicePixelRatio,
+      }).then((unityInstance) => {
+        unity = unityInstance;
+      });
+      const inspectorOn = document.querySelector('#inspector-on');
+      inspectorOn.addEventListener('click', () => {
+        unity.SendMessage(API_OBJ_NAME, 'TurnOnInspector');
+      });
+      const inspectorOff = document.querySelector('#inspector-off');
+      inspectorOff.addEventListener('click', () => {
+        unity.SendMessage(API_OBJ_NAME, 'TurnOffInspector');
+      });
+      const quit = document.querySelector('#quit');
+      quit.addEventListener('click', () => {
+        unity.Quit().then(() => {
+          console.log('Quitted from Unity');
+          unity = null;
+        });
+      });
+    </script>
+  </body>
+</html>
